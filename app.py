@@ -15,7 +15,7 @@ from waitress import serve
 from prompt import *
 
 app = Flask(__name__, static_folder="src/static", template_folder="src/templates")
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 load_dotenv()
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
