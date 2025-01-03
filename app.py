@@ -1,6 +1,7 @@
 import os
 from flask import Flask, request, jsonify
 from langchain_groq import ChatGroq
+from flask_cors import CORS
 from langchain.chains import LLMChain
 from langchain_core.prompts import (
     ChatPromptTemplate,
@@ -14,7 +15,7 @@ from waitress import serve
 from prompt import *
 
 app = Flask(__name__, static_folder="src/static", template_folder="src/templates")
-
+CORS(app)
 load_dotenv()
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
