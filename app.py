@@ -15,7 +15,7 @@ from waitress import serve
 from prompt import *
 
 app = Flask(__name__, static_folder="src/static", template_folder="src/templates")
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True,)
 load_dotenv()
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
@@ -48,19 +48,26 @@ def generate_response(text):
     
     return conversation.predict(human_input=text)
 
-@app.route("/res", methods=["GET", "POST"])
+@app.route("/res", methods=["OPTIONS", "POST"])
 def res():
+    if request.method == "OPTIONS":
+        response = app.response_class(
+            response="", status=204, headers={"Access-Control-Allow-Origin": "http://localhost:5173"}
+        )
+        response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        return response
+
     try:
         data = request.get_json()
         query = data.get("query")
-        
+
         if not query:
             return jsonify({"error": "No query provided"}), 400
-        
+
         bot_response = generate_response(query)
-        
-        return jsonify({"response": bot_response})
-    
+        return jsonify({"response": bot_response}), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
